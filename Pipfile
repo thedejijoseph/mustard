@@ -5,6 +5,10 @@ name = "pypi"
 
 [packages]
 django = "*"
+environs = "*"
+djangorestframework = "*"
+psycopg2-binary = "*"
+pip-system-certs = "*"
 
 [dev-packages]
 
