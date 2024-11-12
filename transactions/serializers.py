@@ -6,6 +6,9 @@ from rest_framework import serializers
 
 from transactions.models import Transaction
 from mustard.util import encrypt
+from mustard.kms_util import InfisicalKMSClient
+
+inf_kms = InfisicalKMSClient()
 
 class TransactionDetailSerializer(serializers.ModelSerializer):
     class Meta:
@@ -70,11 +73,13 @@ class TransactionSerializer(serializers.ModelSerializer):
         amount = validated_data.get("amount")
 
         # Mask the card_pan (show only the last four digits)
-        masked_pan = f"************{card_pan[-4:]}"
+        mask_length = len(card_pan)-4
+        mask = "*" * mask_length
+        masked_pan =f"{mask}{card_pan[-4:]}"
 
         # Encrypt card_pan and card_expiry
-        encrypted_pan = encrypt(plain_text=card_pan)
-        encrypted_expiry = encrypt(plain_text=card_expiry)
+        encrypted_pan = inf_kms.encrypt(plaintext=card_pan)
+        encrypted_expiry = inf_kms.encrypt(plaintext=card_expiry)
 
         # Save the encrypted and masked data in the database
         transaction = Transaction.objects.create(
