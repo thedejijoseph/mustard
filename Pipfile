@@ -9,6 +9,7 @@ environs = "*"
 djangorestframework = "*"
 psycopg2-binary = "*"
 pip-system-certs = "*"
+cryptography = "*"
 
 [dev-packages]
 
