@@ -6,6 +6,7 @@ from django.shortcuts import render
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 
 from transactions.models import Transaction
 from transactions.serializers import TransactionSerializer, TransactionDetailSerializer
@@ -13,6 +14,8 @@ from transactions.serializers import TransactionSerializer, TransactionDetailSer
 transaction_logger = logging.getLogger('transaction_logger')
 
 class TransactionView(APIView):
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+
     def get(self, request):
         transactions = Transaction.objects.all()
         serializer = TransactionDetailSerializer(transactions, many=True)
