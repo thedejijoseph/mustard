@@ -134,3 +134,36 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+log_dir = BASE_DIR / 'logs'
+log_dir.mkdir(exist_ok=True)
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'transaction_file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'logs' / 'transaction.log',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'transaction_logger': {
+            'handlers': ['transaction_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}
