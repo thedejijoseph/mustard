@@ -14,7 +14,7 @@ env = Env()
 env.read_env()
 
 # Configure logging
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("utils_logger")
 
 # Constants (ensure these are set in Django settings)
 INF_CLIENT_SECRET = env.str('INF_CLIENT_SECRET')

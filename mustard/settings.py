@@ -154,10 +154,21 @@ LOGGING = {
             'filename': BASE_DIR / 'logs' / 'transaction.log',
             'formatter': 'verbose',
         },
+        'access_log_file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'logs' / 'access.log',
+            'formatter': 'verbose',
+        },
     },
     'loggers': {
         'transaction_logger': {
             'handlers': ['transaction_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'utils_logger': {
+            'handlers': ['access_log_file'],
             'level': 'INFO',
             'propagate': False,
         },
