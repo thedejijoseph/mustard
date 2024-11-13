@@ -28,7 +28,7 @@ SECRET_KEY = inf_secret('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(inf_secret('DEBUG', default=False))
 
-ALLOWED_HOSTS = list(inf_secret('ALLOWED_HOSTS', default='[]'))
+ALLOWED_HOSTS = inf_secret('ALLOWED_HOSTS').split(',')
 
 
 # Application definition
