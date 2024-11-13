@@ -13,10 +13,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 
 
-from environs import Env
-
-env = Env()
-env.read_env()
+from config.infisical import inf_secret
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,12 +23,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env.str('SECRET_KEY')
+SECRET_KEY = inf_secret('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env.bool('DEBUG')
+DEBUG = bool(inf_secret('DEBUG', default=False))
 
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
+ALLOWED_HOSTS = list(inf_secret('ALLOWED_HOSTS', default='[]'))
 
 
 # Application definition
@@ -84,12 +81,11 @@ WSGI_APPLICATION = 'mustard.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': env.str('DB_NAME'),
-        'USER': env.str('DB_USER'),
-        'PASSWORD': env.str('DB_PASS'),
-        'HOST': env.str('DB_HOST'),
-        'PORT': env.str('DB_PORT'),
-        # 'OPTIONS': {'sslmode': 'require'}
+        'NAME': inf_secret('DB_NAME'),
+        'USER': inf_secret('DB_USER'),
+        'PASSWORD': inf_secret('DB_PASS'),
+        'HOST': inf_secret('DB_HOST'),
+        'PORT': inf_secret('DB_PORT')
     }
 }
 

@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "1ef2bbcfd45adfa34c5f07bbce7180349b9894b224708ee4c84c8ac6a8b319a9"
+            "sha256": "27fe88a0fd42211f2595b1e973a9ea588fdb248dac8c6082b76b983411e44628"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -285,6 +285,51 @@
             ],
             "markers": "python_version >= '3.6'",
             "version": "==3.10"
+        },
+        "infisical-python": {
+            "hashes": [
+                "sha256:01020f7cf1c8784e1d29e9b7c7a00a7818f8af548f45e0db0fc5ab871dc6e05a",
+                "sha256:13ffbfc5dafc555e9fb2e040e05f6b3f28bb5982a0ed4a6c0e650d71ed2f3e16",
+                "sha256:1ba7a43212c703ff0ec23d99810381c0c49ab5b305908300cc0f37a9d90739fa",
+                "sha256:1bf56cca416ae0230c339fc4ec1ab26d3c0fc3c6299fbdd35baef2ef2c4a3797",
+                "sha256:1fd04582f4742d64b4b0755a5351efc270bccdc36f91d84f98de0e12de36ca52",
+                "sha256:24eba5423cf06a599870d749ea7b65ba9a1b5779fdaa139e7b5e5dc5f6187ad4",
+                "sha256:2c3026268301e4d56bfb8edf9c61e06653f60b8bbf8c0d0d6bad493974df05ef",
+                "sha256:386f717f400cfb020b4cc53b66f763c860523e3be6ba9d8525d33b22b17a5afa",
+                "sha256:4965e61dd2371bedf0bb8d5c13c6d500a7c18aafbf9bede469517ce0689eb9b0",
+                "sha256:4aa64a28a9284cf1d46328aed806fbf9ea8a19a57753758c0a7b7a7d698d916a",
+                "sha256:4cb67f1ac3eca62e3f09f73d03725b94a6c42c71a10b81b10ea86e21a192d4ec",
+                "sha256:4d68e63142c57f9beea3498425f220495288c36e9189f8d2818040d34621d753",
+                "sha256:4ef5d400b2e69bc7133bc520bdd23b09a73cd280b5b152f575c03f08763e4905",
+                "sha256:52c870e378c856acce52321bdb48d3928f812bc0575ee1ea407ae58cbd7252bd",
+                "sha256:68437d7178c220948166726d6ca8ca544e8e7f9fa960230e0ea9b39ea440a40a",
+                "sha256:6a115854bb4ef2b8470898ff18bcc5832307a6cdd7a96fa9872125ab11b9a2f0",
+                "sha256:7557f4933f14b0f020fa23ab60e7e3e4fde319f9b51860749bc9405f560ebf1c",
+                "sha256:7bc60217246e5da71747ca27d55768fb812dd8bc32ca0b5123fa69153777e461",
+                "sha256:819c8819b1a3ca46627328a36b8375d22649864a85516f23c1ff81289b2a5900",
+                "sha256:87f166ce9fee1ac316412a7f019189a6485e93e53a0d29bec4eccece591f0511",
+                "sha256:8cccf41df5a2b24664d6f610a50b1a19bdf6991cc95b2187ad0b8e5f7c3deca3",
+                "sha256:8d426713143ec49edc77e059059d97bb47f371c56e8de8ab83d60d2d3b7f239f",
+                "sha256:8f5fd5992cc0de4a8e571bb659c7685d995142735e77fe1d3e7e5329a90703b5",
+                "sha256:914f4517f3501a70c3795429e4a710b5d5d9cdbbf4b7799b35b92d38aec7d1d1",
+                "sha256:afd254045ceddeb136c393d4d9e2d0c0a6889c10dc478d921b7154fd4d94420a",
+                "sha256:b1ccb66916698a0cd78c3451877511f7657e6ff0b902c5986d256c9f53d02863",
+                "sha256:b3d537a6f18fcebcfa0f1ac0207c3f8370a78db6b37944364953fa5f729b2c18",
+                "sha256:b4904eb825ad3ed3dd3efa08e4a9ba2393fa22fabb0f4298d1b0cfaac3a1e58d",
+                "sha256:be6457a13f9726cbecc36f7af193e3201d949522ee765d48d6ad754469ea4535",
+                "sha256:c2daafb2e8d2a97e890b03212899a55d3061f51330cd65a7a6febf42b8686e3b",
+                "sha256:d1d5c4797bee9c83cf34b39b088d32b1302f964973e38642868bf676c334dcae",
+                "sha256:d72b1ea9a5a5ee00d8ec3a0402ac2e55cd35baece482ed79e8aefbcffda6a506",
+                "sha256:d86c9f6bfc88cc4694e2850da80c82b05c1479995337ba650971752aacc1c0fa",
+                "sha256:dbd99805c2baf4b62f3d2181f2f180b086b39ddefc03e25150cee11bd222cc42",
+                "sha256:f386c937832a60f8a408ad64a21ab2f101add3b1d68b2e5dd203203ca73d4fcb",
+                "sha256:f52ca7f6a63150eb0ebf0eda5f350cb3b2519e7a0b4a88f2b74827f72e8cae06",
+                "sha256:fa69e60a9bd4cbe8be54f3d6c2f702af45889c5edaab2c29fef5b921d2bb4429",
+                "sha256:fd29431212acf0420a5c6f659c19cc026ea2a7edcbc050067666ba52c9df3a0a"
+            ],
+            "index": "pypi",
+            "markers": "python_version >= '3.7'",
+            "version": "==2.3.5"
         },
         "marshmallow": {
             "hashes": [

@@ -11,6 +11,7 @@ psycopg2-binary = "*"
 pip-system-certs = "*"
 cryptography = "*"
 requests = "*"
+infisical-python = "*"
 
 [dev-packages]
 

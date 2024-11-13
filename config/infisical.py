@@ -7,6 +7,7 @@ from django.conf import settings
 from rest_framework.exceptions import APIException
 from requests.exceptions import RequestException
 
+from infisical_client import ClientSettings, InfisicalClient, GetSecretOptions, AuthenticationOptions, UniversalAuthMethod
 from environs import Env
 
 env = Env()
@@ -20,6 +21,33 @@ INF_CLIENT_SECRET = env.str('INF_CLIENT_SECRET')
 INF_CLIENT_ID = env.str('INF_CLIENT_ID')
 INF_KMS_KEY_ID = env.str('INF_KMS_KEY_ID')
 INFISICAL_BASE_URL = "https://app.infisical.com/api/v1"
+INF_ENV = env.str('INF_ENV')
+INF_PORJECT_ID = env.str('INF_PROJECT_ID')
+
+inf_client = InfisicalClient(ClientSettings(
+    auth=AuthenticationOptions(
+      universal_auth=UniversalAuthMethod(
+        client_id=INF_CLIENT_ID,
+        client_secret=INF_CLIENT_SECRET,
+      )
+    )
+))
+
+def inf_secret(key: str, env: str=INF_ENV, project_id: str=INF_PORJECT_ID, default=None) -> str:
+    try:
+        secret = inf_client.getSecret(options=GetSecretOptions(
+        environment=env,
+        project_id=project_id,
+        secret_name=key
+        ))
+
+        return secret.secret_value
+    except Exception as e:
+        if default:
+            return default
+        else:
+            raise e
+
 
 class InfisicalKMSClient:
     def __init__(self):
