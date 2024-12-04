@@ -12,6 +12,7 @@ pip-system-certs = "*"
 cryptography = "*"
 requests = "*"
 infisical-python = "*"
+gunicorn = "*"
 
 [dev-packages]
 
