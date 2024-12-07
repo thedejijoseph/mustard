@@ -195,6 +195,8 @@ REST_FRAMEWORK = {
     )
 }
 
+AUTH_USER_MODEL = "mustardauth.User"
+
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = inf_secret('EMAIL_HOST', default='')
 EMAIL_PORT = 587
