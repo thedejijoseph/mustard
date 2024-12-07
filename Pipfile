@@ -6,13 +6,14 @@ name = "pypi"
 [packages]
 django = "*"
 environs = "*"
-djangorestframework = "*"
 psycopg2-binary = "*"
 pip-system-certs = "*"
 cryptography = "*"
 requests = "*"
 infisical-python = "*"
 gunicorn = "*"
+djangorestframework = "*"
+djangorestframework-simplejwt = "*"
 
 [dev-packages]
 

@@ -41,7 +41,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'transactions'
+    # third party apps
+    'rest_framework',
+    'rest_framework_simplejwt',
+
+    'transactions',
+    'mustardauth',
+    'misc'
 ]
 
 MIDDLEWARE = [
@@ -184,4 +190,14 @@ REST_FRAMEWORK = {
         'anon': '10/minute',  # Limit anonymous users to 10 requests per minute
         'user': '100/day',    # Limit authenticated users to 100 requests per day
     },
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
 }
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = inf_secret('EMAIL_HOST', default='')
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = inf_secret('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = inf_secret('EMAIL_HOST_PASSWORD')

@@ -23,4 +23,5 @@ urlpatterns = [
     # path('admin/', admin.site.urls),
     path('', views.index, name='index'),
     path('', include('transactions.urls')),
+    path('auth/', include('mustardauth.urls')),
 ]
