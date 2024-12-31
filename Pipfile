@@ -16,6 +16,7 @@ djangorestframework = "*"
 djangorestframework-simplejwt = "*"
 
 [dev-packages]
+reloadium = "*"
 
 [requires]
 python_version = "3.11"
