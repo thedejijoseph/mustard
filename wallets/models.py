@@ -24,21 +24,20 @@ class Wallet(models.Model):
         return f"{self.user.email}'s Wallet - {self.currency}"
 class Transaction(models.Model):
     TRANSACTION_TYPE_CHOICES = [
-        ('FUND', 'Fund'),
-        ('WITHDRAW', 'Withdraw'),
-        ('TRANSFER', 'Transfer'),
+        ('debit', 'Debit'),
+        ('credit', 'Credit'),
     ]
     TRANSACTION_STATUS_CHOICES = [
-        ('PENDING', 'Pending'),
-        ('COMPLETED', 'Completed'),
-        ('FAILED', 'Failed'),
+        ('pending', 'Pending'),
+        ('completed', 'Completed'),
+        ('failed', 'Failed'),
     ]
 
     transaction_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE, related_name="transactions")
     amount = models.DecimalField(max_digits=12, decimal_places=2)
     transaction_type = models.CharField(max_length=10, choices=TRANSACTION_TYPE_CHOICES)
-    status = models.CharField(max_length=10, choices=TRANSACTION_STATUS_CHOICES, default='PENDING')
+    status = models.CharField(max_length=10, choices=TRANSACTION_STATUS_CHOICES, default='pending')
     payment_provider = models.CharField(max_length=50, null=True, blank=True)
     reference = models.CharField(max_length=100, unique=True, null=True, blank=True)
     recipient = models.ForeignKey(

@@ -11,11 +11,56 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import ValidationError
 from rest_framework import status
 
-from .serializers import CreateWalletSerializer, FundWalletSerializer, WithdrawSerializer, TransferSerializer
-from .payment_providers import PaystackProvider, PaymentProviderInterface
+from .serializers import WithdrawSerializer, TransferSerializer, \
+    WalletSerializer, TransactionSerializer
+from .payment_providers import PaystackProvider
 
 from .models import Wallet, Transaction
 
+class UserWalletsView(APIView):
+    """Fetch all wallets belonging to the signed-in user."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        wallets = Wallet.objects.filter(user=user)
+        serializer = WalletSerializer(wallets, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class WalletDetailView(APIView):
+    """Fetch details of a specific wallet."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, wallet_id):
+        user = request.user
+        try:
+            wallet = Wallet.objects.get(wallet_id=wallet_id, user=user)
+        except Wallet.DoesNotExist:
+            return Response(
+                {"error": "Wallet not found or you are not authorised to access this wallet."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        serializer = WalletSerializer(wallet)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class WalletTransactionHistoryView(APIView):
+    """Fetch transaction history for a specific wallet."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, wallet_id):
+        user = request.user
+        try:
+            wallet = Wallet.objects.get(wallet_id=wallet_id, user=user)
+        except Wallet.DoesNotExist:
+            return Response(
+                {"error": "Wallet not found or you are not authorised to access this wallet."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        transactions = Transaction.objects.filter(wallet=wallet).order_by('-created_at')
+        serializer = TransactionSerializer(transactions, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 class CreateWalletView(APIView):
     permission_classes = [IsAuthenticated]
@@ -111,9 +156,9 @@ class FundWalletView(APIView):
             Transaction.objects.create(
                 wallet=wallet,
                 amount=amount,
-                transaction_type="FUND",
-                status="PENDING",
-                payment_provider="PAYSTACK",
+                transaction_type="credit",
+                status="pending",
+                payment_provider="paystack",
                 reference=reference,
             )
 
@@ -123,7 +168,6 @@ class FundWalletView(APIView):
             )
 
         return Response({"error": "Failed to initiate payment."}, status=status.HTTP_400_BAD_REQUEST)
-    
 
 class WithdrawView(APIView):
     def post(self, request):
