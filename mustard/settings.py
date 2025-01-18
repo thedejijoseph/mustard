@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'misc',
     'wallets',
     'webhooks',
+    'bankaccounts',
 ]
 
 MIDDLEWARE = [

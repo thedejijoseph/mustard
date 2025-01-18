@@ -51,3 +51,30 @@ class PaystackProvider(PaymentProviderInterface):
         response = requests.post(url, json=payload, headers=self._headers())
         response.raise_for_status()
         return response.json()
+
+    def resolve_bank_account(self, account_number, bank_code):
+        """Resolve a bank account number."""
+        url = f"{self.BASE_URL}/bank/resolve?account_number={account_number}&bank_code={bank_code}"
+        response = requests.get(url, headers=self._headers())
+        response.raise_for_status()
+        data = response.json()
+        if not data["status"]:
+            raise ValueError(data["message"])
+        return data["data"]
+
+    def create_transfer_recipient(self, account_name, account_number, bank_code, currency="NGN"):
+        """Create a transfer recipient."""
+        url = f"{self.BASE_URL}/transferrecipient"
+        payload = {
+            "type": "nuban",
+            "name": account_name,
+            "account_number": account_number,
+            "bank_code": bank_code,
+            "currency": currency,
+        }
+        response = requests.post(url, json=payload, headers=self._headers())
+        response.raise_for_status()
+        data = response.json()
+        if not data["status"]:
+            raise ValueError(data["message"])
+        return data["data"]

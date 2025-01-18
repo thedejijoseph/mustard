@@ -26,4 +26,5 @@ urlpatterns = [
     path('auth/', include('mustardauth.urls')),
     path('wallets/', include('wallets.urls')),
     path('webhooks/', include('webhooks.urls')),
+    path('bankaccounts/', include('bankaccounts.urls')),
 ]
