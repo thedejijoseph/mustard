@@ -35,17 +35,12 @@ class PaystackProvider(PaymentProviderInterface):
         response.raise_for_status()
         return response.json()
 
-    def transfer_funds(self, account_number, bank_code, amount, reason=""):
+    def transfer_funds(self, amount, recipient_code, reason=""):
         url = f"{self.BASE_URL}/transfer"
         payload = {
             "source": "balance",
             "amount": int(amount * 100),  # Convert to kobo
-            "recipient": {
-                "type": "nuban",
-                "account_number": account_number,
-                "bank_code": bank_code,
-                "currency": "NGN",
-            },
+            "recipient": recipient_code,
             "reason": reason,
         }
         response = requests.post(url, json=payload, headers=self._headers())

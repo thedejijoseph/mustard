@@ -4,6 +4,7 @@ from decimal import Decimal, ROUND_DOWN, InvalidOperation
 from django.shortcuts import render
 from django.utils.timezone import now
 from django.db.models import Sum
+from django.shortcuts import get_object_or_404
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -16,6 +17,7 @@ from .serializers import WithdrawSerializer, TransferSerializer, \
 from .payment_providers import PaystackProvider
 
 from .models import Wallet, Transaction
+from bankaccounts.models import BankAccount
 
 class UserWalletsView(APIView):
     """Fetch all wallets belonging to the signed-in user."""
@@ -42,7 +44,6 @@ class WalletDetailView(APIView):
             )
         serializer = WalletSerializer(wallet)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
 
 class WalletTransactionHistoryView(APIView):
     """Fetch transaction history for a specific wallet."""
@@ -169,28 +170,79 @@ class FundWalletView(APIView):
 
         return Response({"error": "Failed to initiate payment."}, status=status.HTTP_400_BAD_REQUEST)
 
-class WithdrawView(APIView):
-    def post(self, request):
-        serializer = WithdrawSerializer(data=request.data)
-        if serializer.is_valid():
-            account_number = serializer.validated_data['account_number']
-            bank_code = serializer.validated_data['bank_code']
-            amount = serializer.validated_data['amount']
-            reason = serializer.validated_data.get('reason', 'Withdrawal')
+class WithdrawFundsView(APIView):
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        wallet = user.wallet
 
-            wallet = request.user.wallet
-            if wallet.balance < amount:
-                return Response({"error": "Insufficient balance"}, status=status.HTTP_400_BAD_REQUEST)
+        # Extract and validate input
+        amount = request.data.get("amount")
+        currency = request.data.get("currency", "NGN")
+        bank_account_id = request.data.get("bank_account_id")
 
-            provider = PaystackProvider()
-            response = provider.transfer_funds(account_number, bank_code, amount, reason)
+        # Ensure all required fields are provided
+        if not amount or not bank_account_id:
+            return Response(
+                {"error": "Amount and bank account ID are required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
-            # Deduct balance and log transaction
-            wallet.balance -= amount
-            wallet.save()
-            Transaction.objects.create(wallet=wallet, amount=amount, transaction_type="WITHDRAW")
-            return Response(response, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # Validate amount
+        try:
+            amount = Decimal(amount).quantize(Decimal("0.01"), rounding=ROUND_DOWN)
+            if amount <= 0:
+                raise ValueError("Amount must be greater than 0.")
+        except (ValueError, InvalidOperation) as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Fetch bank account
+        bank_account = get_object_or_404(BankAccount, id=bank_account_id, user=user)
+
+        # Validate transaction against user's tier limits
+        limits = user.transaction_limits
+        if amount > Decimal(limits["debit_limit"]):
+            return Response(
+                {"error": f"Amount exceeds your tier's debit limit of {limits['debit_limit']}."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if wallet.balance - amount < 0:
+            return Response(
+                {"error": "Insufficient wallet balance."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Call payment provider to transfer funds
+        provider = PaystackProvider()
+        try:
+            response = provider.transfer_funds(
+                amount=float(amount),  # Convert Decimal to float for API
+                recipient_code=bank_account.recipient_code,
+                reason="Wallet withdrawal",
+            )
+        except Exception as e:
+            return Response(
+                {"error": "Withdrawal failed", "details": str(e)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Log the transaction
+        transaction = Transaction.objects.create(
+            wallet=wallet,
+            amount=amount,
+            transaction_type="debit",
+            recipient=None,  # No wallet recipient in this case
+            # metadata={"bank_account": str(bank_account.id)},
+        )
+
+        # Update wallet balance
+        wallet.balance -= amount
+        wallet.save()
+
+        return Response(
+            {"message": "Withdrawal successful", "transaction_id": transaction.transaction_id, "reference": response.get("data", {}).get("reference")},
+            status=status.HTTP_200_OK,
+        )
 
 class TransferView(APIView):
     def post(self, request):
