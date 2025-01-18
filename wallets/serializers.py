@@ -26,6 +26,13 @@ class WalletSerializer(serializers.ModelSerializer):
     class Meta:
         model = Wallet
         fields = ['wallet_id', 'currency', 'balance', 'created_at']
+    
+    def validate(self, attrs):
+        user = attrs["user"]
+        currency = attrs["currency"]
+        if Wallet.objects.filter(user=user, currency=currency).exists():
+            raise serializers.ValidationError(f"A wallet for {currency} already exists.")
+        return attrs
 
 
 class TransactionSerializer(serializers.ModelSerializer):
@@ -40,3 +47,15 @@ class TransactionSerializer(serializers.ModelSerializer):
             'status',
             'created_at',
         ]
+    
+    def validate(self, attrs):
+        credit_source_type = attrs.get("credit_source_type")
+        credit_source_id = attrs.get("credit_source_id")
+        debit_destination_type = attrs.get("debit_destination_type")
+        debit_destination_id = attrs.get("debit_destination_id")
+
+        if credit_source_type and not credit_source_id:
+            raise serializers.ValidationError("Credit source ID is required when specifying a credit source.")
+        if debit_destination_type and not debit_destination_id:
+            raise serializers.ValidationError("Debit destination ID is required when specifying a debit destination.")
+        return attrs

@@ -232,7 +232,9 @@ class WithdrawFundsView(APIView):
             amount=amount,
             transaction_type="debit",
             recipient=None,  # No wallet recipient in this case
-            # metadata={"bank_account": str(bank_account.id)},
+            metadata={"bank_account": str(bank_account.id)},
+            debit_destination_type="bankaccount",
+            debit_destination_id=str(bank_account.id),
         )
 
         # Update wallet balance
