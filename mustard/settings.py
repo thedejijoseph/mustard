@@ -24,6 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = inf_secret('SECRET_KEY')
+PAYSTACK_SECRET_KEY = inf_secret('PAYSTACK_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(inf_secret('DEBUG', default=False))
@@ -47,7 +48,9 @@ INSTALLED_APPS = [
 
     'transactions',
     'mustardauth',
-    'misc'
+    'misc',
+    'wallets',
+    'webhooks',
 ]
 
 MIDDLEWARE = [
@@ -203,3 +206,5 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = inf_secret('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = inf_secret('EMAIL_HOST_PASSWORD')
+
+APPEND_SLASH=False

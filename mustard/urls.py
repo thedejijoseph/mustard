@@ -24,4 +24,6 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('', include('transactions.urls')),
     path('auth/', include('mustardauth.urls')),
+    path('wallets/', include('wallets.urls')),
+    path('webhooks/', include('webhooks.urls')),
 ]
