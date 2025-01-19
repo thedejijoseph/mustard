@@ -18,6 +18,7 @@ from .payment_providers import PaystackProvider
 
 from .models import Wallet, Transaction
 from bankaccounts.models import BankAccount
+from mustardauth.models import User
 
 class UserWalletsView(APIView):
     """Fetch all wallets belonging to the signed-in user."""
@@ -25,6 +26,16 @@ class UserWalletsView(APIView):
 
     def get(self, request):
         user = request.user
+        wallets = Wallet.objects.filter(user=user)
+        serializer = WalletSerializer(wallets, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class UsersWalletsView(APIView):
+    """Fetch all wallets belonging to a specific user. Find user by username."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, username):
+        user = get_object_or_404(User, username=username)
         wallets = Wallet.objects.filter(user=user)
         serializer = WalletSerializer(wallets, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -93,6 +104,7 @@ class CreateWalletView(APIView):
             },
             status=status.HTTP_201_CREATED
         )
+
 class FundWalletView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -171,6 +183,8 @@ class FundWalletView(APIView):
         return Response({"error": "Failed to initiate payment."}, status=status.HTTP_400_BAD_REQUEST)
 
 class WithdrawFundsView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def post(self, request, *args, **kwargs):
         user = request.user
         wallet = user.wallet
@@ -246,28 +260,72 @@ class WithdrawFundsView(APIView):
             status=status.HTTP_200_OK,
         )
 
-class TransferView(APIView):
+class WalletTransferView(APIView):
+    """Transfer funds between wallets."""
+    permission_classes = [IsAuthenticated]
+
     def post(self, request):
-        serializer = TransferSerializer(data=request.data)
-        if serializer.is_valid():
-            recipient_wallet_id = serializer.validated_data['recipient_wallet_id']
-            amount = serializer.validated_data['amount']
+        sender_wallet_id = request.data.get("sender_wallet_id")
+        recipient_wallet_id = request.data.get("recipient_wallet_id")
+        amount = Decimal(request.data.get("amount", "0"))
 
-            wallet = request.user.wallet
-            if wallet.balance < amount:
-                return Response({"error": "Insufficient balance"}, status=status.HTTP_400_BAD_REQUEST)
+        if amount <= 0:
+            return Response({"error": "Transfer amount must be greater than zero."}, status=status.HTTP_400_BAD_REQUEST)
 
-            try:
-                recipient_wallet = Wallet.objects.get(pk=recipient_wallet_id)
-            except Wallet.DoesNotExist:
-                return Response({"error": "Recipient wallet not found"}, status=status.HTTP_404_NOT_FOUND)
+        # Get sender and recipient wallets
+        sender_wallet = get_object_or_404(Wallet, wallet_id=sender_wallet_id)
+        recipient_wallet = get_object_or_404(Wallet, wallet_id=recipient_wallet_id)
 
-            # Perform transfer
-            wallet.balance -= amount
-            recipient_wallet.balance += amount
-            wallet.save()
-            recipient_wallet.save()
+        # Ensure the user owns the sender wallet
+        if sender_wallet.user != request.user:
+            return Response({"error": "You can only transfer from wallets you own."}, status=status.HTTP_403_FORBIDDEN)
 
-            Transaction.objects.create(wallet=wallet, amount=amount, transaction_type="TRANSFER", recipient=recipient_wallet)
-            return Response({"status": "Transfer successful"}, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # Ensure wallets use the same currency
+        if sender_wallet.currency != recipient_wallet.currency:
+            return Response({"error": "Wallets must use the same currency."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Check sender's transaction limits
+        sender_limits = sender_wallet.user.transaction_limits
+        if amount > Decimal(sender_limits["debit_limit"]):
+            return Response({"error": f"Transaction exceeds debit limit of {sender_limits['debit_limit']}."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Check sender's balance
+        if sender_wallet.balance < amount:
+            return Response({"error": "Insufficient balance."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Check recipient's transaction limits
+        recipient_limits = recipient_wallet.user.transaction_limits
+        if recipient_limits["max_balance"] is not None:  # Only check if max_balance is defined
+            new_recipient_balance = recipient_wallet.balance + amount
+            if new_recipient_balance > Decimal(recipient_limits["max_balance"]):
+                return Response({"error": "Transaction would exceed recipient's maximum balance."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if amount > Decimal(recipient_limits["credit_limit"]):
+            return Response({"error": f"Transaction exceeds recipient's credit limit of {recipient_limits['credit_limit']}."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Perform the transfer
+        sender_wallet.balance -= amount
+        recipient_wallet.balance += amount
+        sender_wallet.save()
+        recipient_wallet.save()
+
+        # Log transactions for both wallets
+        Transaction.objects.create(
+            wallet=sender_wallet,
+            amount=amount,
+            transaction_type="debit",
+            metadata={"transfer_to_wallet": recipient_wallet.id},
+            debit_destination_type="wallet",
+            debit_destination_id=str(recipient_wallet.id),
+        )
+        Transaction.objects.create(
+            wallet=recipient_wallet,
+            amount=amount,
+            transaction_type="credit",
+            metadata={"transfer_from_wallet": sender_wallet.id},
+            credit_source_type="wallet",
+            credit_source_id=str(sender_wallet.id),
+        )
+
+        return Response({"message": "Transfer successful."}, status=status.HTTP_200_OK)
+    
